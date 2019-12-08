@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<title>
+			Test
+		</title>
+
+		<script src="webgl-utils.js" type="text/javascript"></script>
+
+		
+		<script src="grapher2d_equation.js" type="text/javascript"></script>
+		<script src="grapher2d_inputHandling.js" type="text/javascript"></script>
+		<script src="grapher2d_grid.js" type="text/javascript"></script>
+		<script src="grapher2d_shaders.js" type="text/javascript"></script>
+		<script src="grapher2d.js" type="text/javascript"></script>
+	</head>
+
+	<body>
+
+		<div id="test-div">
+			<canvas id="test-canvas" width="600" height="600" style="border-color: #000000; border-style: solid">
+				Please use a browser that supports Canvas!
+			</canvas>
+		</div>
+
+		<p style="margin-top: 20px;">
+			<input type="text" id = "myText" value = "sin(x)" style="font-size: 24px;"/>
+			<button type="button" style="font-size: 24px;" onclick="graphFunction()">Submit</button>
+		</p>
+
+		<script>
+			var canvas = document.getElementById("test-canvas");
+			var gp = gpInitCanvas(canvas, [-15, -15, 15, 15]);
+
+			var textbox = document.getElementById("myText");
+
+			graphFunction();
+
+			function graphFunction() {
+				gpGraph(gp, textbox.value);
+			}
+		</script>
+
+		<p style="font-size: 20px;">
+			The source code can be found <a href="https://github.com/sharhar/sharhar.github.io">here</a>
+		</p>
+	</body>
+</html>
