@@ -133,7 +133,38 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
 			render = 1.0;
 			float x = left + (id/600.0)*(right-left);
 			float result = ` + eq + `;
-			gl_Position = vec4(id/300.0-1.0, 2.0*(result-down)/(up-down)-1.0, 0.0, 1.0);
+
+			float result_y = 2.0*(result-down)/(up-down)-1.0;
+
+			x = left + ((id-2.0)/600.0)*(right-left);
+			float l2 =  ` + eq + `;
+			
+			x = left + ((id-1.0)/600.0)*(right-left);
+			float l =  ` + eq + `;
+
+			x = left + ((id+1.0)/600.0)*(right-left);
+			float r =  ` + eq + `;
+
+			x = left + ((id+2.0)/600.0)*(right-left);
+			float r2 =  ` + eq + `;
+
+			float ml2 = sign(l - l2);
+			float ml = sign(result - l);
+			float mr = sign(r - result);
+			float mr2 = sign(r2 - r);
+
+			float pl = (ml2 - ml)*mr*0.5 - 0.5; //This only equals 0.5 when m1==m2 and m!=m1, otherwise it is 0.0 or negative
+			float apl = pl + abs(pl); //if pl is 0.0 or negative, apl is 0.0, otherwise it it 2.0*pl
+
+			float pr = (mr2 - mr)*ml*0.5 - 0.5; //This only equals 0.5 when m1==m2 and m!=m1, otherwise it is 0.0 or negative
+			float apr = pr + abs(pr); //if pr is 0.0 or negative, apr is 0.0, otherwise it it 2.0*pr
+
+			float lc = apl*(-mr - result_y);
+			float rc = apr*(ml - result_y);
+			
+			render = 1.0 - apl - apr;
+
+			gl_Position = vec4(id/300.0-1.0, result_y + lc + rc, 0.0, 1.0);
 		}`;
 
 	var fs_src = `
@@ -143,7 +174,7 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
         varying float render;
 
 		void main(void) {
-			gl_FragColor = vec4(1.0, 0.0, 0.0, render*256.0);
+			gl_FragColor = vec4(1.0, 0.0, 0.0, sign(render));
 		}
 	`;
 
