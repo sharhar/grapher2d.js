@@ -130,7 +130,6 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
 		` + funcs +  `
 		
 		void main(void) {
-			render = 1.0;
 			float x = left + (id/600.0)*(right-left);
 			float result = ` + eq + `;
 

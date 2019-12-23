@@ -1,20 +1,26 @@
 //sin(x) + cos(y) = tan(y) - sec(x)*(sin(t*2)^2 + 0.1)
 
 function gpInitCanvas(canvas, bounds) {
-	var gl = canvas.getContext("webgl2");//WebGLUtils.setupWebGL(canvas);
+	var gl = canvas.getContext("webgl2");//
+
+	if(!gl) {
+		console.log("Failed to get the rendering context for WebGL 2! Defaulting to WebGL 1.");
+
+		gl = WebGLUtils.setupWebGL(canvas);
+		if(!gl) {
+			console.log("Failed to get the rendering context for WebGL 1!");
+			return;
+		}
+	} else {
+		var ext = gl.getExtension('EXT_color_buffer_float');
+		if (!ext) {
+			console.log("cannot render to float");
+		}
+	}
+
 
 	console.log(gl.getSupportedExtensions());
 	console.log(gl.getParameter(gl.VERSION));
-
-	if(!gl) {
-		console.log("Failed ot get the rendering context for WebGL!");
-		return;
-	}
-
-	var ext = gl.getExtension('EXT_color_buffer_float');
-	if (!ext) {
-		console.log("cannot render to float");
-	}
 
 	canvas.onmousemove = gpInternal_mouseMoveCallback;
 	canvas.onwheel = gpInternal_mouseWheelCallback;
@@ -29,9 +35,6 @@ function gpInitCanvas(canvas, bounds) {
 	gl.g_up = bounds[3];
 	gl.viewportWidth = canvas.width;
 	gl.viewportHeight = canvas.height;
-	gl.clearColor(0.0, 0.0, 0.0, 1.0);
-
-	gl.has_data = false;
 
 	gl.ZOOM_PERCENT = 0.025
 
@@ -248,11 +251,7 @@ function gpInternal_startGameLoop(gl) {
 		}
 	}
 
-	//setInterval(function() {
-	//	for(var i = 0; i < 12; i++) {
-			render_rec();
-	//	}
-	//}, 1);
+	render_rec();
 }
 
 function gpInternal_getShader(gl, str, type) {
