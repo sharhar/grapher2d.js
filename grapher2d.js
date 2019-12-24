@@ -1,7 +1,7 @@
 //sin(x) + cos(y) = tan(y) - sec(x)*(sin(t*2)^2 + 0.1)
 
 function gpInitCanvas(canvas, bounds) {
-	var gl = canvas.getContext("webgl2");//
+	var gl = canvas.getContext("webgl2");
 
 	if(!gl) {
 		console.log("Failed to get the rendering context for WebGL 2! Defaulting to WebGL 1.");

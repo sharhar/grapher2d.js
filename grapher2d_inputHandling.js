@@ -81,4 +81,6 @@ function gpInternal_mouseWheelCallback(e) {
 	gl.g_left = gl.g_left + x1;
 	gl.g_up = gl.g_down + y2;
 	gl.g_down = gl.g_down + y1;
+
+	e.preventDefault();
 }
