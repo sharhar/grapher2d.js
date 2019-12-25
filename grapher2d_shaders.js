@@ -102,6 +102,30 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
 			return (dx_/2.0)*(result0_ + result1_)/x;
 		}
 
+		float sin_c(float x) {
+			float sx = 0.5*x/pi;
+			float tsx = abs(sx - float(int(sx)));
+
+			float negval = sign(x);
+
+			float sm = sign(1.0 - tsx*2.0);
+
+			float stsx = tsx*2.0 - float(int(tsx*2.0));
+
+			float stsx_rep = 1.0-abs(1.0-stsx*2.0);
+
+			float enable_cos = sign(stsx_rep*2.0 - 1.0)*0.5+0.5;
+			float enable_sin = abs(enable_cos-1.0);
+
+			float cx = 0.25*pi-abs(1.0-stsx_rep*2.0)*0.25*pi;
+			float cx3 = cx*cx*cx;
+			float cx7 = cx3*cx*cx*cx*cx;
+			float result = cx - (cx3/6.0) + (cx3*cx*cx/120.0) - (cx7/5040.0) + (cx7*cx*cx/362880.0);
+
+			float result_cos = sqrt(1.0 - result*result);
+			return negval*sm*(result*enable_sin + result_cos*enable_cos);
+		}
+
 		float asin_c(float x) {
 			if(abs(x) > 1.0) {
 				render = 0.0;
@@ -134,7 +158,7 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
 			float result = ` + eq + `;
 
 			float result_y = 2.0*(result-down)/(up-down)-1.0;
-
+/*
 			x = left + ((id-2.0)/600.0)*(right-left);
 			float l2 =  ` + eq + `;
 			
@@ -162,7 +186,10 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
 			float rc = apr*(ml - result_y);
 			
 			render = 1.0 - apl - apr;
-
+*/
+			render = 1.0;
+			float lc = 0.0;
+			float rc = 0.0;
 			gl_Position = vec4(id/300.0-1.0, result_y + lc + rc, 0.0, 1.0);
 		}`;
 
@@ -276,6 +303,11 @@ function gpInternal_createCalcShader(gl, eq, funcs) {
 
 			return (dx_/2.0)*(result0_ + result1_)/x;
 		}
+
+		float sin_c(float x) {
+			return sin(x);
+		}
+
 
 		float asin_c(float x) {
 			if(abs(x) > 1.0 && render) {
