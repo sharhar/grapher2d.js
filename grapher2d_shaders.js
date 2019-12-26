@@ -1,64 +1,8 @@
-function gpInternal_createQuadShader(gl) {
-	var vs_src = `
-		attribute vec2 pos;
-
-  		varying vec2 texcoord_out;
-		
-		void main(void) {
-			gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
-			texcoord_out = (pos + 1.0)/2.0;
-		}`;
-
-	var fs_src = `
-		precision mediump float;
-
-		uniform sampler2D tex;
-
-		varying vec2 texcoord_out;
-
-		void main(void) {
-			gl_FragColor = texture2D(tex, texcoord_out);//vec4(texcoord_out.xy, 0, 1);
-		}`;
-
-	var vsh = gpInternal_getShader(gl, vs_src, gl.VERTEX_SHADER);
-    var fsh = gpInternal_getShader(gl, fs_src, gl.FRAGMENT_SHADER);
-
-	gl.shader_quad = gl.createProgram();
-
-	gl.attachShader(gl.shader_quad, vsh);
-    gl.attachShader(gl.shader_quad, fsh);
-    gl.linkProgram(gl.shader_quad);
-
-    if (!gl.getProgramParameter(gl.shader_quad, gl.LINK_STATUS)) {
-      alert("Could not initialise shaders");
-    }
-
-    gl.useProgram(gl.shader_quad);
-
-    gl.shader_quad.texLoc = gl.getUniformLocation(gl.shader_quad, "tex");
-
-    gl.shader_quad.vpa_pos = gl.getAttribLocation(gl.shader_quad, "pos");
-}
-
-function gpInternal_createVertCalcShader(gl, eq, funcs) {
-
-	var vs_src = `
-		attribute float id;
-
-		precision highp float;
-        precision highp int;
-
-		uniform float up;
-		uniform float down;
-		uniform float left;
-		uniform float right;
-		uniform float t;
-		
+var math_funcs = `
+	
 		const float e = 2.718281828459045;
 		const float pi = 3.141592653589793;
 		const float tau = 3.141592653589793 * 2.0;
-
-		varying float render;
 		
 		float powi_c(float b, float p) {
 			if(mod(p,2.0) == 0.0) {
@@ -125,6 +69,65 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
 			float result_cos = sqrt(1.0 - result*result);
 			return negval*sm*(result*enable_sin + result_cos*enable_cos);
 		}
+`;
+
+function gpInternal_createQuadShader(gl) {
+	var vs_src = `
+		attribute vec2 pos;
+
+  		varying vec2 texcoord_out;
+		
+		void main(void) {
+			gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
+			texcoord_out = (pos + 1.0)/2.0;
+		}`;
+
+	var fs_src = `
+		precision mediump float;
+
+		uniform sampler2D tex;
+
+		varying vec2 texcoord_out;
+
+		void main(void) {
+			gl_FragColor = texture2D(tex, texcoord_out);//vec4(texcoord_out.xy, 0, 1);
+		}`;
+
+	var vsh = gpInternal_getShader(gl, vs_src, gl.VERTEX_SHADER);
+    var fsh = gpInternal_getShader(gl, fs_src, gl.FRAGMENT_SHADER);
+
+	gl.shader_quad = gl.createProgram();
+
+	gl.attachShader(gl.shader_quad, vsh);
+    gl.attachShader(gl.shader_quad, fsh);
+    gl.linkProgram(gl.shader_quad);
+
+    if (!gl.getProgramParameter(gl.shader_quad, gl.LINK_STATUS)) {
+      alert("Could not initialise shaders");
+    }
+
+    gl.useProgram(gl.shader_quad);
+
+    gl.shader_quad.texLoc = gl.getUniformLocation(gl.shader_quad, "tex");
+
+    gl.shader_quad.vpa_pos = gl.getAttribLocation(gl.shader_quad, "pos");
+}
+
+function gpInternal_createVertCalcShader(gl, eq, funcs) {
+
+	var vs_src = `
+		attribute float id;
+
+		precision highp float;
+        precision highp int;
+
+		uniform float up;
+		uniform float down;
+		uniform float left;
+		uniform float right;
+		uniform float t;
+
+		varying float render;
 
 		float asin_c(float x) {
 			if(abs(x) > 1.0) {
@@ -150,15 +153,15 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
 
 			return atan(1.0/x);
 		}
-
-		` + funcs +  `
+		
+		` + math_funcs + funcs +  `
 		
 		void main(void) {
 			float x = left + (id/600.0)*(right-left);
 			float result = ` + eq + `;
 
 			float result_y = 2.0*(result-down)/(up-down)-1.0;
-/*
+
 			x = left + ((id-2.0)/600.0)*(right-left);
 			float l2 =  ` + eq + `;
 			
@@ -186,10 +189,7 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
 			float rc = apr*(ml - result_y);
 			
 			render = 1.0 - apl - apr;
-*/
-			render = 1.0;
-			float lc = 0.0;
-			float rc = 0.0;
+			
 			gl_Position = vec4(id/300.0-1.0, result_y + lc + rc, 0.0, 1.0);
 		}`;
 
@@ -252,61 +252,12 @@ function gpInternal_createCalcShader(gl, eq, funcs) {
 		precision highp float;
 
 		uniform float t;
-		const float e = 2.718281828459045;
-		const float pi = 3.141592653589793;
-		const float tau = 3.141592653589793 * 2.0;
 
 		const float pxw = 1.0/600.0;
 		
 		varying vec4 coord;
 
 		bool render = true;
-		
-		float powi_c(float b, float p) {
-			if(mod(p,2.0) == 0.0) {
-				return pow(abs(b), p);
-			}
-			return sign(b)*pow(abs(b), p);
-		}
-
-		float pow_c(float b, float p) {
-			int pi = int(p);
-			if(p < 0.0) {
-				if(float(pi) == p) {
-					return 1.0/(powi_c(b, abs(float(pi))));
-				} else {
-					return 1.0/(pow(b, abs(p)));
-				}
-			}
-			if(float(pi) == p) {
-				return powi_c(b, float(pi));
-			} else {
-				return pow(b, p);
-			}
-		}
-
-		float gamma(float x) {
-			float num = x+1.0;
-			float result0_ = 0.0;
-			float result1_ = 0.0;
-			float b_ = num*25.0;
-			float dx_ = b_/250.0;
-			float h = 0.0;
-			result0_ += pow_c(h, (num-1.0))*exp(-h);
-			h = b_;
-			result0_ += pow_c(h, (num-1.0))*exp(-h);
-
-			for(float k_ = 1.0; k_ < 250.0; k_++) {
-				h = k_*dx_;
-				result1_ += 2.0*pow_c(h, (num-1.0))*exp(-h);
-			}
-
-			return (dx_/2.0)*(result0_ + result1_)/x;
-		}
-
-		float sin_c(float x) {
-			return sin(x);
-		}
 
 
 		float asin_c(float x) {
@@ -331,7 +282,7 @@ function gpInternal_createCalcShader(gl, eq, funcs) {
 			return atan(1.0/x);
 		}
 
-		` + funcs +  `
+		` + math_funcs + funcs +  `
 
 		void main(void) {
 			float x = coord.x;
