@@ -69,6 +69,14 @@ var math_funcs = `
 			float result_cos = sqrt(1.0 - result*result);
 			return negval*sm*(result*enable_sin + result_cos*enable_cos);
 		}
+
+		float cos_c(float x) {
+			return sin_c(x + pi*0.5);
+		}
+
+		float tan_c(float x) {
+			return sin_c(x)/cos_c(x);
+		}
 `;
 
 function gpInternal_createQuadShader(gl) {
@@ -257,25 +265,22 @@ function gpInternal_createCalcShader(gl, eq, funcs) {
 		
 		varying vec4 coord;
 
-		bool render = true;
-
-
 		float asin_c(float x) {
-			if(abs(x) > 1.0 && render) {
+			if(abs(x) > 1.0) {
 				discard;
 			}
 			return asin(x);
 		}
 
 		float acos_c(float x) {
-			if(abs(x) > 1.0 && render) {
+			if(abs(x) > 1.0) {
 				discard;
 			}
 			return acos(x);
 		}
 
 		float acot_c(float x) {
-			if(abs(x) < pxw*coord.z && render) {
+			if(abs(x) < pxw*coord.z) {
 				discard;
 			}
 
@@ -288,16 +293,7 @@ function gpInternal_createCalcShader(gl, eq, funcs) {
 			float x = coord.x;
 			float y = coord.y;
 			float result = ` + eq + `;
-			render = false;
-			float total = result;
-			y = 0.0;
-			result = ` + eq + `;
-			float totaly0 = result;
-			x = 0.0;
-			y = coord.y;
-			result = ` + eq + `;
-			float totalx0 = result;
-			gl_FragColor = vec4(total, totaly0, totalx0, 1.0);
+			gl_FragColor = vec4(result, 0.0, 0.0, 1.0);
 		}
 	`;
 
@@ -368,12 +364,8 @@ function gpInternal_createEdgeShader(gl, width, height) {
 			if(sign(u.x) != sign(c.x) && (sign(m1) != sign(m2) || sign(m1) == sign(m))) {
 				return 1.0;
 			}
-			
-			float m10 = (c.z - d.z);
-			float m20 = (u2.z - u.z);
-			float m0 = (u.z - c.z);
-			
-			if(sign(u.x) == sign(c.x) && sign(u.z) != sign(c.z) && sign(m10) == sign(m20) && sign(m10) != sign(m0)) {
+
+			if(sign(u.x) == sign(c.x) && sign(m1) == sign(m2) && sign(m1) != sign(m) && sign(m)*sign(m1)*sign(m2) != 0.0) {
 				return 1.0;
 			}
 
@@ -393,11 +385,7 @@ function gpInternal_createEdgeShader(gl, width, height) {
 				return 1.0;
 			}
 
-			m10 = (c.y - l.y);
-			m20 = (r2.y - r.y);
-			m0 = (r.y - c.y);
-
-			if(sign(r.x) == sign(c.x) && sign(r.y) != sign(c.y) && sign(m10) == sign(m20) && sign(m10) != sign(m0)) {
+			if(sign(r.x) == sign(c.x) && sign(m1) == sign(m2) && sign(m1) != sign(m) && sign(m)*sign(m1)*sign(m2) != 0.0) {
 				return 1.0;
 			}
 
