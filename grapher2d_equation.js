@@ -576,6 +576,16 @@ function getNodeString(node, funcID, currentVars) {
 			result.body = "sin_c(" + childString.body + ")";
 			result.funcs = childString.funcs;
 		}
+		else if (name == "cos") {
+			childString = getNodeString(node.children[0], funcID, currentVars);
+			result.body = "cos_c(" + childString.body + ")";
+			result.funcs = childString.funcs;
+		}
+		else if (name == "tan") {
+			childString = getNodeString(node.children[0], funcID, currentVars);
+			result.body = "tan_c(" + childString.body + ")";
+			result.funcs = childString.funcs;
+		}
 		else if (name == "asin") {
 			childString = getNodeString(node.children[0], funcID, currentVars);
 			result.body = "asin_c(" + childString.body + ")";
