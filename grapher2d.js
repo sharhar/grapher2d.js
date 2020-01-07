@@ -248,6 +248,8 @@ function gpInternal_startGameLoop(gl) {
 			gl.uniform1f(gl.shader_calc.rightLoc, gl.g_right);
 			gl.uniform1f(gl.shader_calc.timeLoc, (gl.current_time - gl.time)/1000.0);
 
+			gl.uniform3f(gl.shader_calc.colorLoc, 0.8, 0.2, 0.2);
+
 			gl.drawArrays(gl.LINE_STRIP, 0, gl.line_ids.numItems);
 		}
 	}

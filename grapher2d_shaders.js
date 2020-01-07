@@ -211,8 +211,10 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
 
         varying float render;
 
+		uniform vec3 g_color;
+
 		void main(void) {
-			gl_FragColor = vec4(1.0, 0.0, 0.0, sign(render));
+			gl_FragColor = vec4(g_color.xyz, sign(render));
 		}
 	`;
 
@@ -239,6 +241,8 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
     gl.shader_calc.rightLoc = gl.getUniformLocation(gl.shader_calc, "right");
 
     gl.shader_calc.timeLoc = gl.getUniformLocation(gl.shader_calc, "t");
+
+    gl.shader_calc.colorLoc = gl.getUniformLocation(gl.shader_calc, "g_color");
 
     gl.shader_calc.vpa_pos = gl.getAttribLocation(gl.shader_calc, "id");
 }
