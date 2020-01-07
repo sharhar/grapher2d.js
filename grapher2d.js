@@ -171,8 +171,6 @@ function gpInternal_startGameLoop(gl) {
 
 		gl.clear(gl.COLOR_BUFFER_BIT);
 
-		
-
 		gl.bindBuffer(gl.ARRAY_BUFFER, gl.vbo_quad);
 
 		gl.enableVertexAttribArray(gl.shader_grid.vpa);
@@ -204,6 +202,9 @@ function gpInternal_startGameLoop(gl) {
 			gl.drawArrays(gl.TRIANGLES, 0, 6);
 
 			gl.bindFramebuffer(gl.FRAMEBUFFER, gl.efbo);
+
+			gl.clearColor(0.0, 0.0, 0.0, 1.0);
+			gl.clear(gl.COLOR_BUFFER_BIT);
 
 			gl.enableVertexAttribArray(gl.shader_edge.vpa);
 			gl.useProgram(gl.shader_edge);

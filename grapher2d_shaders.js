@@ -163,23 +163,27 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
 		}
 		
 		` + math_funcs + funcs +  `
+
+		float getXfromID(float ID) {
+			return left + (ID/600.0)*(right-left);
+		}
 		
 		void main(void) {
-			float x = left + (id/600.0)*(right-left);
+			float x = getXfromID(id);
 			float result = ` + eq + `;
 
 			float result_y = 2.0*(result-down)/(up-down)-1.0;
 
-			x = left + ((id-2.0)/600.0)*(right-left);
+			x = getXfromID(id-2.0);
 			float l2 =  ` + eq + `;
 			
-			x = left + ((id-1.0)/600.0)*(right-left);
+			x = getXfromID(id-1.0);
 			float l =  ` + eq + `;
 
-			x = left + ((id+1.0)/600.0)*(right-left);
+			x = getXfromID(id+1.0);
 			float r =  ` + eq + `;
 
-			x = left + ((id+2.0)/600.0)*(right-left);
+			x = getXfromID(id+2.0);
 			float r2 =  ` + eq + `;
 
 			float ml2 = sign(l - l2);
