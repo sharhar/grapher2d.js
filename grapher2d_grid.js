@@ -119,7 +119,7 @@ function gpInternal_drawGrid(gl) {
 
         gl.textPs[index].style.left = tx+12 + "px";
         gl.textPs[index].style.top = textYPos+10 + "px";
-        gl.textPs[index].innerHTML = "" + xrv;
+        gl.textPs[index].innerHTML = "" + fixNumber(xrv.toFixed(10));
 
         gl.uniform4f(gl.shader_grid.transLoc, tx, 300, 0.5, 600);
 
@@ -157,7 +157,7 @@ function gpInternal_drawGrid(gl) {
 
         gl.textPs[index].style.left = textXPos+12 + "px";
         gl.textPs[index].style.top = (bounds.bottom - ty-4) + "px";
-        gl.textPs[index].innerHTML = "" + yrv;
+        gl.textPs[index].innerHTML = "" + fixNumber(yrv.toFixed(10));
 
         gl.uniform4f(gl.shader_grid.transLoc, 300, ty, 600, 0.5);
 
@@ -183,4 +183,24 @@ function gpInternal_drawGrid(gl) {
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
+}
+
+function fixNumber(number) {
+    var result = "";
+
+
+    var foundNonZero = false;
+    var lastFoundNonZero = false;
+
+    for(var i =  number.length-1; i >=0; i--) {
+        foundNonZero |= number.charAt(i) != "0";
+
+        if(foundNonZero && (lastFoundNonZero || number.charAt(i) != ".")) {
+            result = number.charAt(i) + result;
+        }
+
+        lastFoundNonZero = foundNonZero;
+    }
+
+    return result;
 }

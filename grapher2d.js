@@ -160,7 +160,7 @@ function gpInternal_startGameLoop(gl) {
 		gl.frame++;
 
 		if(gl.current_time-gl.start_time > 1000) {
-			console.log(gl.frame);
+			//console.log(gl.frame);
 			gl.frame = 0;
 			gl.start_time = gl.current_time;
 		}
