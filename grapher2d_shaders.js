@@ -121,7 +121,7 @@ function gpInternal_createQuadShader(gl) {
     gl.shader_quad.vpa_pos = gl.getAttribLocation(gl.shader_quad, "pos");
 }
 
-function gpInternal_createVertCalcShader(gl, eq, funcs) {
+function gpInternal_createVertCalcShader(gl, graph, eq, funcs) {
 
 	var vs_src = `
 		attribute float id;
@@ -221,33 +221,33 @@ function gpInternal_createVertCalcShader(gl, eq, funcs) {
 	var vsh = gpInternal_getShader(gl, vs_src, gl.VERTEX_SHADER);
     var fsh = gpInternal_getShader(gl, fs_src, gl.FRAGMENT_SHADER);
 
-	gl.shader_calc = gl.createProgram();
-	gl.shader_calc.vsh = vsh;
-	gl.shader_calc.fsh = fsh;
+	graph.shader_calc = gl.createProgram();
+	graph.shader_calc.vsh = vsh;
+	graph.shader_calc.fsh = fsh;
 
-	gl.attachShader(gl.shader_calc, vsh);
-    gl.attachShader(gl.shader_calc, fsh);
-    gl.linkProgram(gl.shader_calc);
+	gl.attachShader(graph.shader_calc, vsh);
+    gl.attachShader(graph.shader_calc, fsh);
+    gl.linkProgram(graph.shader_calc);
 
-    if (!gl.getProgramParameter(gl.shader_calc, gl.LINK_STATUS)) {
+    if (!gl.getProgramParameter(graph.shader_calc, gl.LINK_STATUS)) {
       alert("Could not initialise shaders");
     }
 
-    gl.useProgram(gl.shader_calc);
+    gl.useProgram(graph.shader_calc);
 
-    gl.shader_calc.upLoc = gl.getUniformLocation(gl.shader_calc, "up");
-    gl.shader_calc.downLoc = gl.getUniformLocation(gl.shader_calc, "down");
-    gl.shader_calc.leftLoc = gl.getUniformLocation(gl.shader_calc, "left");
-    gl.shader_calc.rightLoc = gl.getUniformLocation(gl.shader_calc, "right");
+    graph.shader_calc.upLoc = gl.getUniformLocation(graph.shader_calc, "up");
+    graph.shader_calc.downLoc = gl.getUniformLocation(graph.shader_calc, "down");
+    graph.shader_calc.leftLoc = gl.getUniformLocation(graph.shader_calc, "left");
+    graph.shader_calc.rightLoc = gl.getUniformLocation(graph.shader_calc, "right");
 
-    gl.shader_calc.timeLoc = gl.getUniformLocation(gl.shader_calc, "t");
+    graph.shader_calc.timeLoc = gl.getUniformLocation(graph.shader_calc, "t");
 
-    gl.shader_calc.colorLoc = gl.getUniformLocation(gl.shader_calc, "g_color");
+    graph.shader_calc.colorLoc = gl.getUniformLocation(graph.shader_calc, "g_color");
 
-    gl.shader_calc.vpa_pos = gl.getAttribLocation(gl.shader_calc, "id");
+    graph.shader_calc.vpa_pos = gl.getAttribLocation(graph.shader_calc, "id");
 }
 
-function gpInternal_createCalcShader(gl, eq, funcs) {
+function gpInternal_createCalcShader(gl, graph, eq, funcs) {
 
 	var vs_src = `
 		attribute vec2 pos;
@@ -308,28 +308,28 @@ function gpInternal_createCalcShader(gl, eq, funcs) {
 	var vsh = gpInternal_getShader(gl, vs_src, gl.VERTEX_SHADER);
     var fsh = gpInternal_getShader(gl, fs_src, gl.FRAGMENT_SHADER);
 
-	gl.shader_calc = gl.createProgram();
-	gl.shader_calc.vsh = vsh;
-	gl.shader_calc.fsh = fsh;
+	graph.shader_calc = gl.createProgram();
+	graph.shader_calc.vsh = vsh;
+	graph.shader_calc.fsh = fsh;
 
-	gl.attachShader(gl.shader_calc, vsh);
-    gl.attachShader(gl.shader_calc, fsh);
-    gl.linkProgram(gl.shader_calc);
+	gl.attachShader(graph.shader_calc, vsh);
+    gl.attachShader(graph.shader_calc, fsh);
+    gl.linkProgram(graph.shader_calc);
 
-    if (!gl.getProgramParameter(gl.shader_calc, gl.LINK_STATUS)) {
+    if (!gl.getProgramParameter(graph.shader_calc, gl.LINK_STATUS)) {
       alert("Could not initialise shaders");
     }
 
-    gl.useProgram(gl.shader_calc);
+    gl.useProgram(graph.shader_calc);
 
-    gl.shader_calc.upLoc = gl.getUniformLocation(gl.shader_calc, "up");
-    gl.shader_calc.downLoc = gl.getUniformLocation(gl.shader_calc, "down");
-    gl.shader_calc.leftLoc = gl.getUniformLocation(gl.shader_calc, "left");
-    gl.shader_calc.rightLoc = gl.getUniformLocation(gl.shader_calc, "right");
+    graph.shader_calc.upLoc = gl.getUniformLocation(graph.shader_calc, "up");
+    graph.shader_calc.downLoc = gl.getUniformLocation(graph.shader_calc, "down");
+    graph.shader_calc.leftLoc = gl.getUniformLocation(graph.shader_calc, "left");
+    graph.shader_calc.rightLoc = gl.getUniformLocation(graph.shader_calc, "right");
 
-    gl.shader_calc.timeLoc = gl.getUniformLocation(gl.shader_calc, "t");
+    graph.shader_calc.timeLoc = gl.getUniformLocation(graph.shader_calc, "t");
 
-    gl.shader_calc.vpa_pos = gl.getAttribLocation(gl.shader_calc, "pos");
+    graph.shader_calc.vpa_pos = gl.getAttribLocation(graph.shader_calc, "pos");
 }
 
 function gpInternal_createEdgeShader(gl, width, height) {

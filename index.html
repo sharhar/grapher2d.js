@@ -16,27 +16,49 @@
 
 	<body>
 
-		<div id="test-div">
+		<div id="test-div" style="float: left;">
 			<canvas id="test-canvas" width="600" height="600" style="border-color: #000000; border-style: solid">
 				Please use a browser that supports Canvas!
 			</canvas>
 		</div>
 
-		<p style="margin-top: 20px;">
-			<input type="text" id = "myText" value = "sin(x)" style="font-size: 24px;"/>
-			<button type="button" style="font-size: 24px;" onclick="graphFunction()">Submit</button>
-		</p>
+		<div style="float: left; margin-left: 20px;">
+			<p style="margin-top: 20px;">
+				<input type="text" id = "myText0" value = "sin(x)" style="font-size: 24px;"/>
+				<button type="button" style="font-size: 24px;" onclick="graphFunction(0)">Submit</button>
+			</p>
+
+			<p style="margin-top: 20px;">
+				<input type="text" id = "myText1" value = "" style="font-size: 24px;"/>
+				<button type="button" style="font-size: 24px;" onclick="graphFunction(1)">Submit</button>
+			</p>
+
+			<p style="margin-top: 20px;">
+				<input type="text" id = "myText2" value = "" style="font-size: 24px;"/>
+				<button type="button" style="font-size: 24px;" onclick="graphFunction(2)">Submit</button>
+			</p>
+
+			<p style="margin-top: 20px;">
+				<input type="text" id = "myText3" value = "" style="font-size: 24px;"/>
+				<button type="button" style="font-size: 24px;" onclick="graphFunction(3)">Submit</button>
+			</p>
+
+			<p style="margin-top: 20px;">
+				<input type="text" id = "myText4" value = "" style="font-size: 24px;"/>
+				<button type="button" style="font-size: 24px;" onclick="graphFunction(4)">Submit</button>
+			</p>
+		</div>
+
+		
 
 		<script>
 			var canvas = document.getElementById("test-canvas");
 			var gp = gpInitCanvas(canvas, [-15, -15, 15, 15]);
 
-			var textbox = document.getElementById("myText");
+			graphFunction(0);
 
-			graphFunction();
-
-			function graphFunction() {
-				gpGraph(gp, textbox.value);
+			function graphFunction(index) {
+				gpGraph(gp, document.getElementById("myText" + index).value, index);
 			}
 		</script>
 	</body>
