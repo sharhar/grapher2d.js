@@ -212,8 +212,6 @@ function gpInternal_eqConvert(text) {
 	result.body = resultString.body;
 	result.funcs = resultString.funcs;
 
-	console.log(result.body);
-
 	return result;
 }
 

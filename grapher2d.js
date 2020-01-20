@@ -34,7 +34,7 @@ function createGraph(gl, func) {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
 		result.dfbo = gl.createFramebuffer();
-		gl.bindFramebuffer(gl.FRAMEBUFFER, result.dfbo);  
+		gl.bindFramebuffer(gl.FRAMEBUFFER, result.dfbo);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, result.dfbo_tex, 0);
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
@@ -47,7 +47,7 @@ function createGraph(gl, func) {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
 		result.efbo = gl.createFramebuffer();
-		gl.bindFramebuffer(gl.FRAMEBUFFER, result.efbo);  
+		gl.bindFramebuffer(gl.FRAMEBUFFER, result.efbo);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, result.efbo_tex, 0);
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	} else {
@@ -92,18 +92,23 @@ function gpInitCanvas(canvas, bounds) {
 		if (!ext) {
 			console.log("cannot render to float");
 		}
+
+		ext = gl.getExtension('EXT_float_blend');
+		if (!ext) {
+			console.log("cannot blend floats");
+		}
 	}
 
 	console.log(gl.getSupportedExtensions());
 	console.log(gl.getParameter(gl.VERSION));
 
-	canvas.gpgl = gl;
-
 	canvas.onmousemove = gpInternal_mouseMoveCallback;
 	canvas.onwheel = gpInternal_mouseWheelCallback;
 
 	gpInternal_initGridNumbers(gl);
-	
+
+	canvas.gpgl = gl;
+
 	gl.g_left = bounds[0];
 	gl.g_down = bounds[1];
 	gl.g_right = bounds[2];
