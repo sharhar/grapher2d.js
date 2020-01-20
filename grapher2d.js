@@ -97,13 +97,13 @@ function gpInitCanvas(canvas, bounds) {
 	console.log(gl.getSupportedExtensions());
 	console.log(gl.getParameter(gl.VERSION));
 
+	canvas.gpgl = gl;
+
 	canvas.onmousemove = gpInternal_mouseMoveCallback;
 	canvas.onwheel = gpInternal_mouseWheelCallback;
 
 	gpInternal_initGridNumbers(gl);
-
-	canvas.gpgl = gl;	
-
+	
 	gl.g_left = bounds[0];
 	gl.g_down = bounds[1];
 	gl.g_right = bounds[2];

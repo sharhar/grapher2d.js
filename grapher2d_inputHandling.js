@@ -53,6 +53,14 @@ function gpInternal_mouseWheelCallback(e) {
 	var y1 = 0;
 	var x2 = gl.g_right - gl.g_left;
 	var y2 = gl.g_up - gl.g_down;
+
+	//if(scroll > 0 && (Math.log2(x2) + 9 < Math.log2(gl.g_right + gl.g_left) - 1 - 5 || Math.log2(y2) + 10 < Math.log2(gl.g_up + gl.g_down) - 1 - 5)) {
+	//	return;
+	//}
+
+	//if(scroll < 0 && (x2 > 65536 || y2 > 65536)) {
+	//	return;
+	//}
 			
 	var w1 = (x / gl.viewportWidth)*x2;
 	var w2 = x2 - w1;
