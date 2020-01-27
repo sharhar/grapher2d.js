@@ -17,6 +17,17 @@ function createGraph(gl, func) {
 
 	result.implicit = func.includes("=");
 
+	result.hasT = false;
+
+	for (var i = 0; i < func.length; i++) {
+		if(func.charCodeAt(i) == 116 && 
+			(i <= 0 || (func.charCodeAt(i-1) < 97 || func.charCodeAt(i-1) > 122)) &&
+			(i >= func.length || (func.charCodeAt(i+1) < 97 || func.charCodeAt(i+1) > 122))) {
+
+			result.hasT = true;
+		}
+	}
+
 	if(result.equationString.error) {
 		alert(result.equationString.error);
 		return;
@@ -70,6 +81,7 @@ function createGraph(gl, func) {
 	result.time = new Date().getTime();
 
 	result.enabled = true;
+	result.needsUpdate = true;
 
 	return result;
 }
@@ -192,6 +204,8 @@ function gpInitCanvas(canvas, bounds) {
 		graphs[i].enabled = false;
 	}
 
+	gl.needsUpdate = false;
+
 	return gl;
 }
 
@@ -240,70 +254,81 @@ function gpInternal_startGameLoop(gl) {
 				continue;
 			}
 
+			if(graphs[i].hasT || gl.needsUpdate) {
+				graphs[i].needsUpdate = true;
+			}
+
+			if(graphs[i].needsUpdate) {
+				if(graphs[i].implicit) {
+					gl.bindFramebuffer(gl.FRAMEBUFFER, graphs[i].dfbo);
+
+					gl.viewport(0, 0, 900, 900);
+
+					gl.bindBuffer(gl.ARRAY_BUFFER, gl.vbo_quad);
+
+					gl.clearColor(1.0, 1.0, 1.0, 0.0);
+					gl.clear(gl.COLOR_BUFFER_BIT);
+
+					gl.enableVertexAttribArray(graphs[i].shader_calc.vpa);
+					gl.useProgram(graphs[i].shader_calc);
+
+					gl.vertexAttribPointer(graphs[i].shader_calc.vpa, gl.vbo_quad.itemSize, gl.FLOAT, false, 0, 0);
+
+					gl.uniform1f(graphs[i].shader_calc.upLoc, gl.g_up);
+					gl.uniform1f(graphs[i].shader_calc.downLoc, gl.g_down);
+					gl.uniform1f(graphs[i].shader_calc.leftLoc, gl.g_left);
+					gl.uniform1f(graphs[i].shader_calc.rightLoc, gl.g_right);
+					gl.uniform1f(graphs[i].shader_calc.timeLoc, (gl.current_time - graphs[i].time)/1000.0);
+
+					gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+					gl.bindFramebuffer(gl.FRAMEBUFFER, graphs[i].efbo);
+
+					gl.viewport(0, 0, 900, 900);
+
+					gl.clearColor(0.0, 0.0, 0.0, 1.0);
+					gl.clear(gl.COLOR_BUFFER_BIT);
+
+					gl.enableVertexAttribArray(gl.shader_edge.vpa);
+					gl.useProgram(gl.shader_edge);
+
+					gl.uniform1i(gl.shader_edge.dataLoc, 0);
+
+					gl.vertexAttribPointer(gl.shader_edge.vpa, gl.vbo_quad.itemSize, gl.FLOAT, false, 0, 0);
+
+					gl.activeTexture(gl.TEXTURE0);
+					gl.bindTexture(gl.TEXTURE_2D, graphs[i].dfbo_tex);
+
+					gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+					gl.bindFramebuffer(gl.FRAMEBUFFER, graphs[i].rfbo);
+
+					gl.viewport(0, 0, 1200, 1200);
+
+					gl.clearColor(0.0, 0.0, 0.0, 1.0);
+					gl.clear(gl.COLOR_BUFFER_BIT);
+
+					gl.enableVertexAttribArray(gl.shader_fill.vpa);
+					gl.useProgram(gl.shader_fill);
+
+					gl.uniform1i(gl.shader_fill.dataLoc, 0);
+
+					gl.vertexAttribPointer(gl.shader_fill.vpa, gl.vbo_quad.itemSize, gl.FLOAT, false, 0, 0);
+
+					gl.activeTexture(gl.TEXTURE0);
+					gl.bindTexture(gl.TEXTURE_2D, graphs[i].efbo_tex);
+
+					gl.drawArrays(gl.TRIANGLES, 0, 6);
+				}
+			}
+
+			
 			if(graphs[i].implicit) {
-				gl.bindFramebuffer(gl.FRAMEBUFFER, graphs[i].dfbo);
-
-				gl.viewport(0, 0, 900, 900);
-
-				gl.bindBuffer(gl.ARRAY_BUFFER, gl.vbo_quad);
-
-				gl.clearColor(1.0, 1.0, 1.0, 0.0);
-				gl.clear(gl.COLOR_BUFFER_BIT);
-
-				gl.enableVertexAttribArray(graphs[i].shader_calc.vpa);
-				gl.useProgram(graphs[i].shader_calc);
-
-				gl.vertexAttribPointer(graphs[i].shader_calc.vpa, gl.vbo_quad.itemSize, gl.FLOAT, false, 0, 0);
-
-				gl.uniform1f(graphs[i].shader_calc.upLoc, gl.g_up);
-				gl.uniform1f(graphs[i].shader_calc.downLoc, gl.g_down);
-				gl.uniform1f(graphs[i].shader_calc.leftLoc, gl.g_left);
-				gl.uniform1f(graphs[i].shader_calc.rightLoc, gl.g_right);
-				gl.uniform1f(graphs[i].shader_calc.timeLoc, (gl.current_time - graphs[i].time)/1000.0);
-
-				gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-				gl.bindFramebuffer(gl.FRAMEBUFFER, graphs[i].efbo);
-
-				gl.viewport(0, 0, 900, 900);
-
-				gl.clearColor(0.0, 0.0, 0.0, 1.0);
-				gl.clear(gl.COLOR_BUFFER_BIT);
-
-				gl.enableVertexAttribArray(gl.shader_edge.vpa);
-				gl.useProgram(gl.shader_edge);
-
-				gl.uniform1i(gl.shader_edge.dataLoc, 0);
-
-				gl.vertexAttribPointer(gl.shader_edge.vpa, gl.vbo_quad.itemSize, gl.FLOAT, false, 0, 0);
-
-				gl.activeTexture(gl.TEXTURE0);
-				gl.bindTexture(gl.TEXTURE_2D, graphs[i].dfbo_tex);
-
-				gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-				gl.bindFramebuffer(gl.FRAMEBUFFER, graphs[i].rfbo);
-
-				gl.viewport(0, 0, 1200, 1200);
-
-				gl.clearColor(0.0, 0.0, 0.0, 1.0);
-				gl.clear(gl.COLOR_BUFFER_BIT);
-
-				gl.enableVertexAttribArray(gl.shader_fill.vpa);
-				gl.useProgram(gl.shader_fill);
-
-				gl.uniform1i(gl.shader_fill.dataLoc, 0);
-
-				gl.vertexAttribPointer(gl.shader_fill.vpa, gl.vbo_quad.itemSize, gl.FLOAT, false, 0, 0);
-
-				gl.activeTexture(gl.TEXTURE0);
-				gl.bindTexture(gl.TEXTURE_2D, graphs[i].efbo_tex);
-
-				gl.drawArrays(gl.TRIANGLES, 0, 6);
-
 				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
 				gl.viewport(0, 0, 600, 600);
+
+				gl.bindBuffer(gl.ARRAY_BUFFER, gl.vbo_quad);
 
 				gl.enableVertexAttribArray(gl.shader_render.vpa);
 				gl.useProgram(gl.shader_render);
@@ -343,8 +368,11 @@ function gpInternal_startGameLoop(gl) {
 
 				gl.drawArrays(gl.LINE_STRIP, 0, gl.line_ids.numItems);
 			}
+
+			graphs[i].needsUpdate = false;
 		}
-		
+
+		gl.needsUpdate = false;
 	}
 
 	render_rec();
