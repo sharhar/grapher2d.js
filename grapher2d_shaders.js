@@ -98,7 +98,7 @@ function gpInternal_createQuadShader(gl) {
 		varying vec2 texcoord_out;
 
 		void main(void) {
-			gl_FragColor = texture2D(tex, texcoord_out);//vec4(texcoord_out.xy, 0, 1);
+			gl_FragColor = texture2D(tex, texcoord_out);
 		}`;
 
 	var vsh = gpInternal_getShader(gl, vs_src, gl.VERTEX_SHADER);
@@ -352,6 +352,8 @@ function gpInternal_createEdgeShader(gl, width, height) {
 		const float pxw = 1.0/` + width + `.0;
 
 		float isColored(vec2 coord) {
+			float result = 0.0;
+
 			vec4 c = texture2D(data, coord);
 			if(c.w == 0.0) {
 				return 0.0;
@@ -426,6 +428,61 @@ function gpInternal_createEdgeShader(gl, width, height) {
     gl.shader_edge.vpa_pos = gl.getAttribLocation(gl.shader_edge, "pos");
 }
 
+function gpInternal_createFillShader(gl, width, height) {
+	var vs_src = `
+		attribute vec2 pos;
+
+  		varying vec2 coord;
+		
+		void main(void) {
+			gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);
+			coord = pos/2.0 + 0.5;
+		}`;
+
+	var fs_src = `
+		precision highp float;
+
+		uniform sampler2D edge;
+		varying vec2 coord;
+
+		const float pw = 1.0/` + width + `.0;
+
+		void main(void) {
+			vec4 out_color = vec4(0.0, 0.0, 0.0, 1.0);
+
+			if(texture2D(edge, vec2(coord.x, coord.y)).x > 0.5 ||
+				texture2D(edge, vec2(coord.x + pw, coord.y)).x > 0.5 ||
+				texture2D(edge, vec2(coord.x - pw, coord.y)).x > 0.5 ||
+				texture2D(edge, vec2(coord.x, coord.y + pw)).x > 0.5 ||
+				texture2D(edge, vec2(coord.x, coord.y - pw)).x > 0.5 ||
+				texture2D(edge, vec2(coord.x + pw*2.0, coord.y)).x > 0.5 ||
+				texture2D(edge, vec2(coord.x, coord.y + pw*2.0)).x > 0.5) {
+				out_color = vec4(1.0, 0.0, 0.0, 1.0);
+			}
+			gl_FragColor = out_color;
+		}
+`;
+
+	var vsh = gpInternal_getShader(gl, vs_src, gl.VERTEX_SHADER);
+    var fsh = gpInternal_getShader(gl, fs_src, gl.FRAGMENT_SHADER);
+
+	gl.shader_fill = gl.createProgram();
+
+	gl.attachShader(gl.shader_fill, vsh);
+    gl.attachShader(gl.shader_fill, fsh);
+    gl.linkProgram(gl.shader_fill);
+
+    if (!gl.getProgramParameter(gl.shader_fill, gl.LINK_STATUS)) {
+      alert("Could not initialise shaders");
+    }
+
+    gl.useProgram(gl.shader_fill);
+
+    gl.shader_fill.edgeLoc = gl.getUniformLocation(gl.shader_fill, "edge");
+
+    gl.shader_fill.vpa_pos = gl.getAttribLocation(gl.shader_fill, "pos");
+}
+
 function gpInternal_createRenderShader(gl, width, height) {
 	var vs_src = `
 		attribute vec2 pos;
@@ -447,7 +504,11 @@ function gpInternal_createRenderShader(gl, width, height) {
 		uniform vec3 g_color;
 
 		void main(void) {
-			gl_FragColor = vec4(g_color.xyz, texture2D(edge, vec2(coord.x, coord.y)).x);
+			float alpha = texture2D(edge, vec2(coord.x, coord.y)).x + 
+							texture2D(edge, vec2(coord.x + pw, coord.y)).x + 
+							texture2D(edge, vec2(coord.x, coord.y + pw)).x + 
+							texture2D(edge, vec2(coord.x + pw, coord.y + pw)).x;
+			gl_FragColor = vec4(g_color.xyz, alpha*0.25);
 		}
 `;
 

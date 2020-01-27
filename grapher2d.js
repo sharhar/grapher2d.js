@@ -27,7 +27,7 @@ function createGraph(gl, func) {
 
 		result.dfbo_tex = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, result.dfbo_tex);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, 600, 600, 0, gl.RGBA, gl.FLOAT, null);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, 900, 900, 0, gl.RGBA, gl.FLOAT, null);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -40,15 +40,28 @@ function createGraph(gl, func) {
 
 		result.efbo_tex = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_2D, result.efbo_tex);
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, 600, 600, 0, gl.RED, gl.UNSIGNED_BYTE, null);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, 900, 900, 0, gl.RED, gl.UNSIGNED_BYTE, null);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
 		result.efbo = gl.createFramebuffer();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, result.efbo);
 		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, result.efbo_tex, 0);
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+		result.rfbo_tex = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, result.rfbo_tex);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, 1200, 1200, 0, gl.RED, gl.UNSIGNED_BYTE, null);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+		result.rfbo = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, result.rfbo);
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, result.rfbo_tex, 0);
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 	} else {
 		gpInternal_createVertCalcShader(gl, result, result.equationString.body, result.equationString.funcs);
@@ -74,6 +87,8 @@ function deleteGraph(gl, graph) {
 		gl.deleteFramebuffer(graph.dfbo);
 		gl.deleteFramebuffer(graph.efbo);
 	}
+
+	graph.enabled = false;
 }
 
 function gpInitCanvas(canvas, bounds) {
@@ -121,8 +136,9 @@ function gpInitCanvas(canvas, bounds) {
 	gpInternal_createGridShader(gl);
     gpInternal_createQuadShader(gl);
 
-    gpInternal_createEdgeShader(gl, 600, 600);
-    gpInternal_createRenderShader(gl, 600, 600);
+    gpInternal_createEdgeShader(gl, 900, 900);
+    gpInternal_createRenderShader(gl, 900, 900);
+    gpInternal_createFillShader(gl, 1200, 1200);
 
     gl.enable(gl.BLEND);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -197,7 +213,7 @@ function gpInternal_startGameLoop(gl) {
 		gl.frame++;
 
 		if(gl.current_time-gl.start_time > 1000) {
-			//console.log(gl.frame);
+			console.log(gl.frame);
 			gl.frame = 0;
 			gl.start_time = gl.current_time;
 		}
@@ -227,6 +243,8 @@ function gpInternal_startGameLoop(gl) {
 			if(graphs[i].implicit) {
 				gl.bindFramebuffer(gl.FRAMEBUFFER, graphs[i].dfbo);
 
+				gl.viewport(0, 0, 900, 900);
+
 				gl.bindBuffer(gl.ARRAY_BUFFER, gl.vbo_quad);
 
 				gl.clearColor(1.0, 1.0, 1.0, 0.0);
@@ -247,6 +265,8 @@ function gpInternal_startGameLoop(gl) {
 
 				gl.bindFramebuffer(gl.FRAMEBUFFER, graphs[i].efbo);
 
+				gl.viewport(0, 0, 900, 900);
+
 				gl.clearColor(0.0, 0.0, 0.0, 1.0);
 				gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -262,7 +282,28 @@ function gpInternal_startGameLoop(gl) {
 
 				gl.drawArrays(gl.TRIANGLES, 0, 6);
 
+				gl.bindFramebuffer(gl.FRAMEBUFFER, graphs[i].rfbo);
+
+				gl.viewport(0, 0, 1200, 1200);
+
+				gl.clearColor(0.0, 0.0, 0.0, 1.0);
+				gl.clear(gl.COLOR_BUFFER_BIT);
+
+				gl.enableVertexAttribArray(gl.shader_fill.vpa);
+				gl.useProgram(gl.shader_fill);
+
+				gl.uniform1i(gl.shader_fill.dataLoc, 0);
+
+				gl.vertexAttribPointer(gl.shader_fill.vpa, gl.vbo_quad.itemSize, gl.FLOAT, false, 0, 0);
+
+				gl.activeTexture(gl.TEXTURE0);
+				gl.bindTexture(gl.TEXTURE_2D, graphs[i].efbo_tex);
+
+				gl.drawArrays(gl.TRIANGLES, 0, 6);
+
 				gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+				gl.viewport(0, 0, 600, 600);
 
 				gl.enableVertexAttribArray(gl.shader_render.vpa);
 				gl.useProgram(gl.shader_render);
@@ -276,7 +317,7 @@ function gpInternal_startGameLoop(gl) {
 				gl.vertexAttribPointer(gl.shader_render.vpa, gl.vbo_quad.itemSize, gl.FLOAT, false, 0, 0);
 
 				gl.activeTexture(gl.TEXTURE0);
-				gl.bindTexture(gl.TEXTURE_2D, graphs[i].efbo_tex);
+				gl.bindTexture(gl.TEXTURE_2D, graphs[i].rfbo_tex);
 
 				gl.drawArrays(gl.TRIANGLES, 0, 6);
 			} else {
